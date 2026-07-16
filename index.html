@@ -425,32 +425,45 @@ function calculate() {
         return;
     }
     const sum = validValues.reduce((a, b) => a + b, 0);
-    const avg = sum / validValues.length;
-    const max = Math.max(...validValues);
-    const min = Math.min(...validValues);
-    const dev = max - min;
-    avgElement.textContent = avg.toFixed(2) + ' N/cm';
-    devElement.textContent = dev.toFixed(2) + ' N/cm';
-    updateStatus(dev);
-}
-function updateStatus(dev) {
+	const avg = sum / validValues.length;
+	const max = Math.max(...validValues);
+	const min = Math.min(...validValues);
+	const dev = max - min;
+
+	// Abweichung des Durchschnitts vom Sollwert
+	const target = parseFloat(document.getElementById('target-tension').value);
+	const targetDev = isNaN(target) ? 0 : Math.abs(avg - target);
+
+avgElement.textContent = avg.toFixed(2) + ' N/cm';
+devElement.textContent = dev.toFixed(2) + ' N/cm';
+
+function updateStatus(dev, targetDev) {
     const statusTag = document.getElementById('status-tag');
     statusTag.className = 'status-indicator';
-    if (isNaN(dev) || !isFinite(dev)) {
+
+    if (
+        isNaN(dev) || !isFinite(dev) ||
+        isNaN(targetDev) || !isFinite(targetDev)
+    ) {
         statusTag.textContent = 'Keine Daten';
         statusTag.classList.add('status-warning');
         return;
     }
+
     const tolPerfect = parseFloat(document.getElementById('tol-perfect').value) || 1.5;
     const tolWarning = parseFloat(document.getElementById('tol-warning').value) || 2.5;
-    if (dev <= tolPerfect) {
-        statusTag.textContent = 'Optimal (\u2264 ' + tolPerfect + ')';
+
+    // Schlechteren Wert verwenden
+    const worstDeviation = Math.max(dev, targetDev);
+
+    if (worstDeviation <= tolPerfect) {
+        statusTag.textContent = 'Optimal';
         statusTag.classList.add('status-perfect');
-    } else if (dev <= tolWarning) {
-        statusTag.textContent = 'Akzeptabel (\u2264 ' + tolWarning + ')';
+    } else if (worstDeviation <= tolWarning) {
+        statusTag.textContent = 'Akzeptabel';
         statusTag.classList.add('status-warning');
     } else {
-        statusTag.textContent = 'Kritisch (> ' + tolWarning + ')';
+        statusTag.textContent = 'Kritisch';
         statusTag.classList.add('status-poor');
     }
 }
@@ -520,14 +533,21 @@ function renderJournal() {
         const tr = document.createElement('tr');
         let statusHTML = '';
         const limitP = entry.tolPerfect !== undefined ? entry.tolPerfect : 1.5;
-        const limitW = entry.tolWarning !== undefined ? entry.tolWarning : 2.5;
-        if (entry.dev <= limitP) {
-            statusHTML = '<span class="status-indicator status-perfect" style="font-size:9px; padding:2px 6px;">Optimal</span>';
-        } else if (entry.dev <= limitW) {
-            statusHTML = '<span class="status-indicator status-warning" style="font-size:9px; padding:2px 6px;">Akzeptabel</span>';
-        } else {
-            statusHTML = '<span class="status-indicator status-poor" style="font-size:9px; padding:2px 6px;">Kritisch</span>';
-        }
+const limitW = entry.tolWarning !== undefined ? entry.tolWarning : 2.5;
+
+const target = parseFloat(entry.targetTension);
+const targetDev = isNaN(target) ? 0 : Math.abs(entry.avg - target);
+
+// Schlechteren Wert verwenden
+const worstDeviation = Math.max(entry.dev, targetDev);
+
+if (worstDeviation <= limitP) {
+    statusHTML = '<span class="status-indicator status-perfect" style="font-size:9px; padding:2px 6px;">Optimal</span>';
+} else if (worstDeviation <= limitW) {
+    statusHTML = '<span class="status-indicator status-warning" style="font-size:9px; padding:2px 6px;">Akzeptabel</span>';
+} else {
+    statusHTML = '<span class="status-indicator status-poor" style="font-size:9px; padding:2px 6px;">Kritisch</span>';
+}
         const tooltipValText = 'Oben L: ' + entry.values[0] + ' | Oben R: ' + entry.values[1] + ' | Mitte: ' + entry.values[2] + ' | Unten L: ' + entry.values[3] + ' | Unten R: ' + entry.values[4];
         const targetVal = parseFloat(entry.targetTension);
         const formattedValuesHTML = entry.values.map(val => {
