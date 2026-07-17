@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="de">
 <head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    
+
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Siebspannung-Rechner</title>
     <style>
@@ -291,6 +291,11 @@
                 <p>Messung an 5 Punkten (N/cm)</p>
             </div>
             <div class="frame-container">
+                <div class="input-node node-tl"><label>O. Links</label><input type="number" id="tl" value="20.4" step="0.1" oninput="calculate()"></div>
+                <div class="input-node node-tr"><label>O. Rechts</label><input type="number" id="tr" value="19.6" step="0.1" oninput="calculate()"></div>
+                <div class="input-node node-center"><label style="color: var(--primary);">Mitte</label><input type="number" id="ct" value="21.0" step="0.1" oninput="calculate()"></div>
+                <div class="input-node node-bl"><label>U. Links</label><input type="number" id="bl" value="18.6" step="0.1" oninput="calculate()"></div>
+                <div class="input-node node-br"><label>U. Rechts</label><input type="number" id="br" value="21.6" step="0.1" oninput="calculate()"></div>
                 <div class="input-node node-tl"><label>O. Links</label><input type="number" inputmode="decimal" id="tl" value="20.4" step="0.1" oninput="calculate()"></div>
                 <div class="input-node node-tr"><label>O. Rechts</label><input type="number" inputmode="decimal" id="tr" value="19.6" step="0.1" oninput="calculate()"></div>
                 <div class="input-node node-center"><label style="color: var(--primary);">Mitte</label><input type="number" inputmode="decimal" id="ct" value="21.0" step="0.1" oninput="calculate()"></div>
@@ -326,14 +331,17 @@
                 </div>
                 <div class="settings-field">
                     <label>Soll-Wert (N/cm)</label>
+                    <input type="number" id="target-tension" value="22" oninput="saveSettings()">
                     <input type="number" inputmode="decimal" id="target-tension" value="22" oninput="saveSettings()">
                 </div>
                 <div class="settings-field">
                     <label>Limit: Optimal (≤)</label>
+                    <input type="number" id="tol-perfect" value="1.0" step="0.1" oninput="onSettingsLimitChange()">
                     <input type="number" inputmode="decimal" id="tol-perfect" value="1.0" step="0.1" oninput="onSettingsLimitChange()">
                 </div>
                 <div class="settings-field">
                     <label>Limit: Akzep. (≤)</label>
+                    <input type="number" id="tol-warning" value="2.0" step="0.1" oninput="onSettingsLimitChange()">
                     <input type="number" inputmode="decimal" id="tol-warning" value="2.0" step="0.1" oninput="onSettingsLimitChange()">
                 </div>
             </div>
@@ -425,45 +433,32 @@ function calculate() {
         return;
     }
     const sum = validValues.reduce((a, b) => a + b, 0);
-	const avg = sum / validValues.length;
-	const max = Math.max(...validValues);
-	const min = Math.min(...validValues);
-	const dev = max - min;
-
-	// Abweichung des Durchschnitts vom Sollwert
-	const target = parseFloat(document.getElementById('target-tension').value);
-	const targetDev = isNaN(target) ? 0 : Math.abs(avg - target);
-
-avgElement.textContent = avg.toFixed(2) + ' N/cm';
-devElement.textContent = dev.toFixed(2) + ' N/cm';
-
-function updateStatus(dev, targetDev) {
+    const avg = sum / validValues.length;
+    const max = Math.max(...validValues);
+    const min = Math.min(...validValues);
+    const dev = max - min;
+    avgElement.textContent = avg.toFixed(2) + ' N/cm';
+    devElement.textContent = dev.toFixed(2) + ' N/cm';
+    updateStatus(dev);
+}
+function updateStatus(dev) {
     const statusTag = document.getElementById('status-tag');
     statusTag.className = 'status-indicator';
-
-    if (
-        isNaN(dev) || !isFinite(dev) ||
-        isNaN(targetDev) || !isFinite(targetDev)
-    ) {
+    if (isNaN(dev) || !isFinite(dev)) {
         statusTag.textContent = 'Keine Daten';
         statusTag.classList.add('status-warning');
         return;
     }
-
     const tolPerfect = parseFloat(document.getElementById('tol-perfect').value) || 1.5;
     const tolWarning = parseFloat(document.getElementById('tol-warning').value) || 2.5;
-
-    // Schlechteren Wert verwenden
-    const worstDeviation = Math.max(dev, targetDev);
-
-    if (worstDeviation <= tolPerfect) {
-        statusTag.textContent = 'Optimal';
+    if (dev <= tolPerfect) {
+        statusTag.textContent = 'Optimal (\u2264 ' + tolPerfect + ')';
         statusTag.classList.add('status-perfect');
-    } else if (worstDeviation <= tolWarning) {
-        statusTag.textContent = 'Akzeptabel';
+    } else if (dev <= tolWarning) {
+        statusTag.textContent = 'Akzeptabel (\u2264 ' + tolWarning + ')';
         statusTag.classList.add('status-warning');
     } else {
-        statusTag.textContent = 'Kritisch';
+        statusTag.textContent = 'Kritisch (> ' + tolWarning + ')';
         statusTag.classList.add('status-poor');
     }
 }
@@ -533,21 +528,14 @@ function renderJournal() {
         const tr = document.createElement('tr');
         let statusHTML = '';
         const limitP = entry.tolPerfect !== undefined ? entry.tolPerfect : 1.5;
-const limitW = entry.tolWarning !== undefined ? entry.tolWarning : 2.5;
-
-const target = parseFloat(entry.targetTension);
-const targetDev = isNaN(target) ? 0 : Math.abs(entry.avg - target);
-
-// Schlechteren Wert verwenden
-const worstDeviation = Math.max(entry.dev, targetDev);
-
-if (worstDeviation <= limitP) {
-    statusHTML = '<span class="status-indicator status-perfect" style="font-size:9px; padding:2px 6px;">Optimal</span>';
-} else if (worstDeviation <= limitW) {
-    statusHTML = '<span class="status-indicator status-warning" style="font-size:9px; padding:2px 6px;">Akzeptabel</span>';
-} else {
-    statusHTML = '<span class="status-indicator status-poor" style="font-size:9px; padding:2px 6px;">Kritisch</span>';
-}
+        const limitW = entry.tolWarning !== undefined ? entry.tolWarning : 2.5;
+        if (entry.dev <= limitP) {
+            statusHTML = '<span class="status-indicator status-perfect" style="font-size:9px; padding:2px 6px;">Optimal</span>';
+        } else if (entry.dev <= limitW) {
+            statusHTML = '<span class="status-indicator status-warning" style="font-size:9px; padding:2px 6px;">Akzeptabel</span>';
+        } else {
+            statusHTML = '<span class="status-indicator status-poor" style="font-size:9px; padding:2px 6px;">Kritisch</span>';
+        }
         const tooltipValText = 'Oben L: ' + entry.values[0] + ' | Oben R: ' + entry.values[1] + ' | Mitte: ' + entry.values[2] + ' | Unten L: ' + entry.values[3] + ' | Unten R: ' + entry.values[4];
         const targetVal = parseFloat(entry.targetTension);
         const formattedValuesHTML = entry.values.map(val => {
