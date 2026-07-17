@@ -2,465 +2,465 @@
 <html lang="de">
 <head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Siebspannung-Rechner</title>
-    <style>
-        :root {
-            --primary: #2563eb;
-            --primary-hover: #1d4ed8;
-            --bg-main: #f8fafc;
-            --card-bg: #ffffff;
-            --frame-border: #475569;
-            --frame-bg: #f1f5f9;
-            --text-dark: #0f172a;
-            --text-muted: #64748b;
-            --accent-green: #10b981;
-            --accent-orange: #f59e0b;
-            --accent-red: #ef4444;
-            --border-color: #e2e8f0;
-        }
-        @media (prefers-color-scheme: dark) {
-            :root {
-                --bg-main: #0f172a;
-                --card-bg: #1e293b;
-                --frame-border: #1e293b;
-                --frame-bg: #334155;
-                --text-dark: #f8fafc;
-                --text-muted: #94a3b8;
-                --border-color: #334155;
-            }
-        }
-        body {
-            font-family: system-ui, -apple-system, sans-serif;
-            background-color: var(--bg-main);
-            color: var(--text-dark);
-            margin: 0;
-            padding: 16px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-height: 100vh;
-            gap: 16px;
-        }
-        .main-layout {
-            display: flex;
-            flex-direction: row;
-            gap: 20px;
-            width: 100%;
-            max-width: 1200px;
-        }
-        @media (max-width: 1024px) {
-            .main-layout {
-                flex-direction: column;
-                align-items: center;
-            }
-        }
-        .left-column {
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-            width: 100%;
-            max-width: 650px;
-            flex-shrink: 0;
-        }
-        .container {
-            background-color: var(--card-bg);
-            border-radius: 16px;
-            padding: 20px;
-            border: 1px solid var(--border-color);
-        }
-        .journal-container {
-            background-color: var(--card-bg);
-            border-radius: 16px;
-            padding: 20px;
-            flex-grow: 1;
-            width: 100%;
-            max-width: 720px;
-            border: 1px solid var(--border-color);
-        }
-        .header {
-            text-align: center;
-            margin-bottom: 16px;
-        }
-        .header h1 {
-            font-size: 20px;
-            font-weight: 800;
-            margin: 0 0 4px 0;
-            text-transform: uppercase;
-        }
-        .header p {
-            font-size: 11px;
-            color: var(--text-muted);
-            margin: 0;
-        }
-        .section-title {
-            font-size: 13px;
-            font-weight: 700;
-            text-transform: uppercase;
-            margin: 0 0 12px 0;
-            border-bottom: 2px solid var(--border-color);
-            padding-bottom: 4px;
-        }
-        .frame-container {
-            position: relative;
-            background-color: var(--frame-bg);
-            border: 16px solid var(--frame-border);
-            border-radius: 14px;
-            aspect-ratio: 4 / 3;
-            margin-bottom: 20px;
-        }
-        .input-node {
-            position: absolute;
-            width: 120px;
-            background: var(--card-bg);
-            border-radius: 10px;
-            padding: 10px;
-            border: 1px solid var(--border-color);
-            transition: transform 0.2s;
-        }
-        .input-node:focus-within {
-            transform: scale(1.08);
-            border-color: var(--primary);
-        }
-        .input-node label {
-            display: block;
-            font-size: 13px;
-            font-weight: 700;
-            color: var(--text-muted);
-            text-align: center;
-            text-transform: uppercase;
-        }
-        .input-node input {
-            width: 100%;
-            border: none;
-            outline: none;
-            font-size: 22px;
-            font-weight: 700;
-            text-align: center;
-            color: var(--text-dark);
-            background: transparent;
-        }
-        .node-tl { top: 12px; left: 12px; }
-        .node-tr { top: 12px; right: 12px; }
-        .node-center { top: calc(50% - 35px); left: calc(50% - 60px); border: 2px solid var(--primary); }
-        .node-bl { bottom: 12px; left: 12px; }
-        .node-br { bottom: 12px; right: 12px; }
-        .settings-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin-bottom: 10px;
-        }
-        .settings-field {
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
-        }
-        .settings-field label {
-            font-size: 10px;
-            font-weight: 700;
-            color: var(--text-muted);
-        }
-        .settings-field input {
-            padding: 8px;
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            font-size: 13px;
-            color: var(--text-dark);
-            background-color: var(--bg-main);
-        }
-        .results-panel {
-            background-color: var(--bg-main);
-            border: 1px solid var(--border-color);
-            border-radius: 10px;
-            padding: 12px;
-            margin-bottom: 16px;
-        }
-        .result-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 6px 0;
-        }
-        .result-row:not(:last-child) {
-            border-bottom: 1px solid var(--border-color);
-        }
-        .result-label {
-            font-size: 12px;
-            font-weight: 600;
-            color: var(--text-muted);
-        }
-        .result-value {
-            font-size: 15px;
-            font-weight: 800;
-            color: var(--primary);
-        }
-        .status-indicator {
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            font-size: 10px;
-            font-weight: 700;
-            padding: 4px 10px;
-            border-radius: 12px;
-        }
-        .status-perfect { background-color: #ecfdf5; color: #065f46; }
-        .status-warning { background-color: #fffbeb; color: #92400e; }
-        .status-poor { background-color: #fef2f2; color: #991b1b; }
-        .button-group {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 8px;
-        }
-        .btn {
-            font-size: 13px;
-            font-weight: 700;
-            padding: 12px;
-            border-radius: 8px;
-            border: none;
-            cursor: pointer;
-            text-align: center;
-        }
-        .btn-primary { background-color: var(--primary); color: white; }
-        .btn-secondary { background-color: var(--border-color); color: var(--text-dark); }
-        .btn-success { background-color: var(--accent-green); color: white; grid-column: span 2; }
-        .journal-actions {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 12px;
-            flex-wrap: wrap;
-        }
-        .search-input {
-            flex-grow: 1;
-            padding: 8px 12px;
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            font-size: 13px;
-            background-color: var(--bg-main);
-            color: var(--text-dark);
-        }
-        .table-wrapper {
-            max-height: 400px;
-            overflow-y: auto;
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 11px;
-        }
-        th {
-            background-color: var(--bg-main);
-            color: var(--text-muted);
-            font-weight: 700;
-            padding: 10px 8px;
-            border-bottom: 1px solid var(--border-color);
-            position: sticky;
-            top: 0;
-        }
-        td {
-            padding: 10px 8px;
-            border-bottom: 1px solid var(--border-color);
-            color: var(--text-dark);
-        }
-        tr:hover td { background-color: var(--bg-main); }
-        .value-badge {
-            display: inline-block;
-            padding: 1px 4px;
-            border-radius: 3px;
-        }
-        .badge-out {
-            background-color: #fef2f2;
-            color: var(--accent-red);
-            font-weight: 700;
-        }
-        .empty-state { text-align: center; padding: 40px; color: var(--text-muted); }
-        .hidden-file-input { display: none; }
-    </style>
-	<link rel="manifest" href="manifest.json">
-	<meta name="theme-color" content="#2563eb">
-	<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Siebspannung-Rechner</title>
+<style>
+:root {
+--primary: #2563eb;
+--primary-hover: #1d4ed8;
+--bg-main: #f8fafc;
+--card-bg: #ffffff;
+--frame-border: #475569;
+--frame-bg: #f1f5f9;
+--text-dark: #0f172a;
+--text-muted: #64748b;
+--accent-green: #10b981;
+--accent-orange: #f59e0b;
+--accent-red: #ef4444;
+--border-color: #e2e8f0;
+}
+@media (prefers-color-scheme: dark) {
+:root {
+--bg-main: #0f172a;
+--card-bg: #1e293b;
+--frame-border: #1e293b;
+--frame-bg: #334155;
+--text-dark: #f8fafc;
+--text-muted: #94a3b8;
+--border-color: #334155;
+}
+}
+body {
+font-family: system-ui, -apple-system, sans-serif;
+background-color: var(--bg-main);
+color: var(--text-dark);
+margin: 0;
+padding: 16px;
+display: flex;
+flex-direction: column;
+align-items: center;
+min-height: 100vh;
+gap: 16px;
+}
+.main-layout {
+display: flex;
+flex-direction: row;
+gap: 20px;
+width: 100%;
+max-width: 1200px;
+}
+@media (max-width: 1024px) {
+.main-layout {
+flex-direction: column;
+align-items: center;
+}
+}
+.left-column {
+display: flex;
+flex-direction: column;
+gap: 16px;
+width: 100%;
+max-width: 650px;
+flex-shrink: 0;
+}
+.container {
+background-color: var(--card-bg);
+border-radius: 16px;
+padding: 20px;
+border: 1px solid var(--border-color);
+}
+.journal-container {
+background-color: var(--card-bg);
+border-radius: 16px;
+padding: 20px;
+flex-grow: 1;
+width: 100%;
+max-width: 720px;
+border: 1px solid var(--border-color);
+}
+.header {
+text-align: center;
+margin-bottom: 16px;
+}
+.header h1 {
+font-size: 20px;
+font-weight: 800;
+margin: 0 0 4px 0;
+text-transform: uppercase;
+}
+.header p {
+font-size: 11px;
+color: var(--text-muted);
+margin: 0;
+}
+.section-title {
+font-size: 13px;
+font-weight: 700;
+text-transform: uppercase;
+margin: 0 0 12px 0;
+border-bottom: 2px solid var(--border-color);
+padding-bottom: 4px;
+}
+.frame-container {
+position: relative;
+background-color: var(--frame-bg);
+border: 16px solid var(--frame-border);
+border-radius: 14px;
+aspect-ratio: 4 / 3;
+margin-bottom: 20px;
+}
+.input-node {
+position: absolute;
+width: 120px;
+background: var(--card-bg);
+border-radius: 10px;
+padding: 10px;
+border: 1px solid var(--border-color);
+transition: transform 0.2s;
+}
+.input-node:focus-within {
+transform: scale(1.08);
+border-color: var(--primary);
+}
+.input-node label {
+display: block;
+font-size: 13px;
+font-weight: 700;
+color: var(--text-muted);
+text-align: center;
+text-transform: uppercase;
+}
+.input-node input {
+width: 100%;
+border: none;
+outline: none;
+font-size: 22px;
+font-weight: 700;
+text-align: center;
+color: var(--text-dark);
+background: transparent;
+}
+.node-tl { top: 12px; left: 12px; }
+.node-tr { top: 12px; right: 12px; }
+.node-center { top: calc(50% - 35px); left: calc(50% - 60px); border: 2px solid var(--primary); }
+.node-bl { bottom: 12px; left: 12px; }
+.node-br { bottom: 12px; right: 12px; }
+.settings-grid {
+display: grid;
+grid-template-columns: 1fr 1fr;
+gap: 10px;
+margin-bottom: 10px;
+}
+.settings-field {
+display: flex;
+flex-direction: column;
+gap: 2px;
+}
+.settings-field label {
+font-size: 10px;
+font-weight: 700;
+color: var(--text-muted);
+}
+.settings-field input {
+padding: 8px;
+border: 1px solid var(--border-color);
+border-radius: 6px;
+font-size: 13px;
+color: var(--text-dark);
+background-color: var(--bg-main);
+}
+.results-panel {
+background-color: var(--bg-main);
+border: 1px solid var(--border-color);
+border-radius: 10px;
+padding: 12px;
+margin-bottom: 16px;
+}
+.result-row {
+display: flex;
+justify-content: space-between;
+align-items: center;
+padding: 6px 0;
+}
+.result-row:not(:last-child) {
+border-bottom: 1px solid var(--border-color);
+}
+.result-label {
+font-size: 12px;
+font-weight: 600;
+color: var(--text-muted);
+}
+.result-value {
+font-size: 15px;
+font-weight: 800;
+color: var(--primary);
+}
+.status-indicator {
+display: inline-flex;
+align-items: center;
+gap: 4px;
+font-size: 10px;
+font-weight: 700;
+padding: 4px 10px;
+border-radius: 12px;
+}
+.status-perfect { background-color: #ecfdf5; color: #065f46; }
+.status-warning { background-color: #fffbeb; color: #92400e; }
+.status-poor { background-color: #fef2f2; color: #991b1b; }
+.button-group {
+display: grid;
+grid-template-columns: 1fr 1fr;
+gap: 8px;
+}
+.btn {
+font-size: 13px;
+font-weight: 700;
+padding: 12px;
+border-radius: 8px;
+border: none;
+cursor: pointer;
+text-align: center;
+}
+.btn-primary { background-color: var(--primary); color: white; }
+.btn-secondary { background-color: var(--border-color); color: var(--text-dark); }
+.btn-success { background-color: var(--accent-green); color: white; grid-column: span 2; }
+.journal-actions {
+display: flex;
+gap: 8px;
+margin-bottom: 12px;
+flex-wrap: wrap;
+}
+.search-input {
+flex-grow: 1;
+padding: 8px 12px;
+border: 1px solid var(--border-color);
+border-radius: 6px;
+font-size: 13px;
+background-color: var(--bg-main);
+color: var(--text-dark);
+}
+.table-wrapper {
+max-height: 400px;
+overflow-y: auto;
+border: 1px solid var(--border-color);
+border-radius: 8px;
+}
+table {
+width: 100%;
+border-collapse: collapse;
+font-size: 11px;
+}
+th {
+background-color: var(--bg-main);
+color: var(--text-muted);
+font-weight: 700;
+padding: 10px 8px;
+border-bottom: 1px solid var(--border-color);
+position: sticky;
+top: 0;
+}
+td {
+padding: 10px 8px;
+border-bottom: 1px solid var(--border-color);
+color: var(--text-dark);
+}
+tr:hover td { background-color: var(--bg-main); }
+.value-badge {
+display: inline-block;
+padding: 1px 4px;
+border-radius: 3px;
+}
+.badge-out {
+background-color: #fef2f2;
+color: var(--accent-red);
+font-weight: 700;
+}
+.empty-state { text-align: center; padding: 40px; color: var(--text-muted); }
+.hidden-file-input { display: none; }
+</style>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#2563eb">
+<link rel="apple-touch-icon" href="icon-192.png">
 </head>
 <body>
 <div class="main-layout">
-    <div class="left-column">
-        <div class="container">
-            <div class="header">
-                <h1>Siebspannung-Rechner</h1>
-                <p>Messung an 5 Punkten (N/cm)</p>
-            </div>
-            <div class="frame-container">
-                <div class="input-node node-tl"><label>O. Links</label><input type="number" id="tl" value="20.4" step="0.1" oninput="calculate()"></div>
-                <div class="input-node node-tr"><label>O. Rechts</label><input type="number" id="tr" value="19.6" step="0.1" oninput="calculate()"></div>
-                <div class="input-node node-center"><label style="color: var(--primary);">Mitte</label><input type="number" id="ct" value="21.0" step="0.1" oninput="calculate()"></div>
-                <div class="input-node node-bl"><label>U. Links</label><input type="number" id="bl" value="18.6" step="0.1" oninput="calculate()"></div>
-                <div class="input-node node-br"><label>U. Rechts</label><input type="number" id="br" value="21.6" step="0.1" oninput="calculate()"></div>
-            </div>
-            <div class="results-panel">
-                <div class="result-row">
-                    <span class="result-label">Durchschnitt:</span>
-                    <span class="result-value" id="avg-val">20.24 N/cm</span>
-                </div>
-                <div class="result-row">
-                    <span class="result-label">Spanne (Abweichung):</span>
-                    <span class="result-value" id="dev-val" style="color: var(--text-dark);">3.00 N/cm</span>
-                </div>
-                <div class="result-row">
-                    <span class="result-label">Status:</span>
-                    <span id="status-tag" class="status-indicator status-poor">Kritisch (&gt; 2.5)</span>
-                </div>
-            </div>
-            <div class="button-group">
-                <button class="btn btn-secondary" onclick="resetForm()">Leeren</button>
-                <button class="btn btn-primary" onclick="loadExample()">Beispiel</button>
-                <button class="btn btn-success" onclick="saveToJournal()">Messung speichern</button>
-            </div>
-        </div>
-        <div class="container">
-            <h2 class="section-title">Vorgaben (Autosave)</h2>
-            <div class="settings-grid">
-                <div class="settings-field">
-                    <label>Siebgewebe</label>
-                    <input type="text" id="mesh-type" value="120-34 Y" oninput="saveSettings()">
-                </div>
-                <div class="settings-field">
-                    <label>Soll-Wert (N/cm)</label>
+<div class="left-column">
+<div class="container">
+<div class="header">
+<h1>Siebspannung-Rechner</h1>
+<p>Messung an 5 Punkten (N/cm)</p>
+</div>
+<div class="frame-container">
+<div class="input-node node-tl"><label>O. Links</label><input type="number" id="tl" value="20.4" step="0.1" oninput="calculate()"></div>
+<div class="input-node node-tr"><label>O. Rechts</label><input type="number" id="tr" value="19.6" step="0.1" oninput="calculate()"></div>
+<div class="input-node node-center"><label style="color: var(--primary);">Mitte</label><input type="number" id="ct" value="21.0" step="0.1" oninput="calculate()"></div>
+<div class="input-node node-bl"><label>U. Links</label><input type="number" id="bl" value="18.6" step="0.1" oninput="calculate()"></div>
+<div class="input-node node-br"><label>U. Rechts</label><input type="number" id="br" value="21.6" step="0.1" oninput="calculate()"></div>
+</div>
+<div class="results-panel">
+<div class="result-row">
+<span class="result-label">Durchschnitt:</span>
+<span class="result-value" id="avg-val">20.24 N/cm</span>
+</div>
+<div class="result-row">
+<span class="result-label">Spanne (Abweichung):</span>
+<span class="result-value" id="dev-val" style="color: var(--text-dark);">3.00 N/cm</span>
+</div>
+<div class="result-row">
+<span class="result-label">Status:</span>
+<span id="status-tag" class="status-indicator status-poor">Kritisch (&gt; 2.5)</span>
+</div>
+</div>
+<div class="button-group">
+<button class="btn btn-secondary" onclick="resetForm()">Leeren</button>
+<button class="btn btn-primary" onclick="loadExample()">Beispiel</button>
+<button class="btn btn-success" onclick="saveToJournal()">Messung speichern</button>
+</div>
+</div>
+<div class="container">
+<h2 class="section-title">Vorgaben (Autosave)</h2>
+<div class="settings-grid">
+<div class="settings-field">
+<label>Siebgewebe</label>
+<input type="text" id="mesh-type" value="120-34 Y" oninput="saveSettings()">
+</div>
+<div class="settings-field">
+<label>Soll-Wert (N/cm)</label>
                     <input type="number" id="target-tension" value="20" oninput="saveSettings()">
                     <input type="number" id="target-tension" value="22" oninput="saveSettings()">
-                </div>
-                <div class="settings-field">
-                    <label>Limit: Optimal (≤)</label>
+</div>
+<div class="settings-field">
+<label>Limit: Optimal (≤)</label>
                     <input type="number" id="tol-perfect" value="1.5" step="0.1" oninput="onSettingsLimitChange()">
                     <input type="number" id="tol-perfect" value="1.0" step="0.1" oninput="onSettingsLimitChange()">
-                </div>
-                <div class="settings-field">
-                    <label>Limit: Akzep. (≤)</label>
+</div>
+<div class="settings-field">
+<label>Limit: Akzep. (≤)</label>
                     <input type="number" id="tol-warning" value="2.5" step="0.1" oninput="onSettingsLimitChange()">
                     <input type="number" id="tol-warning" value="2.0" step="0.1" oninput="onSettingsLimitChange()">
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="journal-container">
-        <div class="journal-header">
-            <h2>Messjournal (Max 500)</h2>
-        </div>
-        <div class="journal-actions">
-            <input type="text" id="search-bar" class="search-input" placeholder="Suche..." oninput="renderJournal()">
-            <button class="btn btn-secondary" style="padding: 8px;" onclick="exportToCSV()">CSV</button>
-            <button class="btn btn-secondary" style="padding: 8px;" onclick="exportToJSON()">Backup</button>
-            <button class="btn btn-secondary" style="padding: 8px;" onclick="triggerJSONImport()">Import</button>
-            <input type="file" id="json-file-input" class="hidden-file-input" accept=".json" onchange="importFromJSON(event)">
-            <button class="btn btn-secondary" style="padding: 8px; color: var(--accent-red);" onclick="clearJournal()">Clear</button>
-        </div>
-        <div class="table-wrapper">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Datum</th>
-                        <th>Gewebe</th>
-                        <th style="text-align: center;">Soll</th>
-                        <th style="text-align: center;">Messpunkte (O/M/U)</th>
-                        <th style="text-align: right;">ø (Ist)</th>
-                        <th style="text-align: right;">Abw.</th>
-                        <th style="text-align: center;">Status</th>
-                    </tr>
-                </thead>
-                <tbody id="journal-body"></tbody>
-            </table>
-            <div id="journal-empty" class="empty-state" style="display: block;">Keine Messungen.</div>
-        </div>
-    </div>
+</div>
+</div>
+</div>
+</div>
+<div class="journal-container">
+<div class="journal-header">
+<h2>Messjournal (Max 500)</h2>
+</div>
+<div class="journal-actions">
+<input type="text" id="search-bar" class="search-input" placeholder="Suche..." oninput="renderJournal()">
+<button class="btn btn-secondary" style="padding: 8px;" onclick="exportToCSV()">CSV</button>
+<button class="btn btn-secondary" style="padding: 8px;" onclick="exportToJSON()">Backup</button>
+<button class="btn btn-secondary" style="padding: 8px;" onclick="triggerJSONImport()">Import</button>
+<input type="file" id="json-file-input" class="hidden-file-input" accept=".json" onchange="importFromJSON(event)">
+<button class="btn btn-secondary" style="padding: 8px; color: var(--accent-red);" onclick="clearJournal()">Clear</button>
+</div>
+<div class="table-wrapper">
+<table>
+<thead>
+<tr>
+<th>Datum</th>
+<th>Gewebe</th>
+<th style="text-align: center;">Soll</th>
+<th style="text-align: center;">Messpunkte (O/M/U)</th>
+<th style="text-align: right;">ø (Ist)</th>
+<th style="text-align: right;">Abw.</th>
+<th style="text-align: center;">Status</th>
+</tr>
+</thead>
+<tbody id="journal-body"></tbody>
+</table>
+<div id="journal-empty" class="empty-state" style="display: block;">Keine Messungen.</div>
+</div>
+</div>
 </div>
 <script>
 const STORAGE_JOURNAL = 'siebspannung_journal_v4';
 const STORAGE_SETTINGS = 'siebspannung_settings';
 const dateTimeFormatter = new Intl.DateTimeFormat('de-DE', {
-    dateStyle: 'short',
-    timeStyle: 'short'
+dateStyle: 'short',
+timeStyle: 'short'
 });
 let journal = [];
 try {
-    const saved = localStorage.getItem(STORAGE_JOURNAL);
-    journal = saved ? JSON.parse(saved) : [];
+const saved = localStorage.getItem(STORAGE_JOURNAL);
+journal = saved ? JSON.parse(saved) : [];
 } catch {
-    journal = [];
+journal = [];
 }
 function escapeHtml(text) {
-    if (typeof text !== 'string') return '';
-    return text.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;').replaceAll("'", '&#39;');
+if (typeof text !== 'string') return '';
+return text.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;').replaceAll("'", '&#39;');
 }
 function loadSettings() {
-    try {
-        const settings = JSON.parse(localStorage.getItem(STORAGE_SETTINGS));
-        if (settings) {
-            document.getElementById('mesh-type').value = settings.meshType || '120-34 Y';
-            document.getElementById('target-tension').value = settings.targetTension || '20';
-            document.getElementById('tol-perfect').value = settings.tolPerfect !== undefined ? settings.tolPerfect : '1.5';
-            document.getElementById('tol-warning').value = settings.tolWarning !== undefined ? settings.tolWarning : '2.5';
-        }
-    } catch (e) {}
+try {
+const settings = JSON.parse(localStorage.getItem(STORAGE_SETTINGS));
+if (settings) {
+document.getElementById('mesh-type').value = settings.meshType || '120-34 Y';
+document.getElementById('target-tension').value = settings.targetTension || '20';
+document.getElementById('tol-perfect').value = settings.tolPerfect !== undefined ? settings.tolPerfect : '1.5';
+document.getElementById('tol-warning').value = settings.tolWarning !== undefined ? settings.tolWarning : '2.5';
+}
+} catch (e) {}
 }
 function saveSettings() {
-    const settings = {
-        meshType: document.getElementById('mesh-type').value,
-        targetTension: document.getElementById('target-tension').value,
-        tolPerfect: parseFloat(document.getElementById('tol-perfect').value) || 1.5,
-        tolWarning: parseFloat(document.getElementById('tol-warning').value) || 2.5
-    };
-    localStorage.setItem(STORAGE_SETTINGS, JSON.stringify(settings));
+const settings = {
+meshType: document.getElementById('mesh-type').value,
+targetTension: document.getElementById('target-tension').value,
+tolPerfect: parseFloat(document.getElementById('tol-perfect').value) || 1.5,
+tolWarning: parseFloat(document.getElementById('tol-warning').value) || 2.5
+};
+localStorage.setItem(STORAGE_SETTINGS, JSON.stringify(settings));
 }
 function onSettingsLimitChange() {
-    saveSettings();
-    calculate();
+saveSettings();
+calculate();
 }
 function calculate() {
-    const ids = ['tl', 'tr', 'ct', 'bl', 'br'];
-    const values = ids.map(id => parseFloat(document.getElementById(id).value));
-    const validValues = values.filter(v => !isNaN(v) && isFinite(v));
-    const avgElement = document.getElementById('avg-val');
-    const devElement = document.getElementById('dev-val');
-    if (validValues.length === 0) {
-        avgElement.textContent = '-- N/cm';
-        devElement.textContent = '-- N/cm';
-        updateStatus(NaN);
-        return;
-    }
-    const sum = validValues.reduce((a, b) => a + b, 0);
-    const avg = sum / validValues.length;
-    const max = Math.max(...validValues);
-    const min = Math.min(...validValues);
-    const dev = max - min;
-    avgElement.textContent = avg.toFixed(2) + ' N/cm';
-    devElement.textContent = dev.toFixed(2) + ' N/cm';
-    updateStatus(dev);
+const ids = ['tl', 'tr', 'ct', 'bl', 'br'];
+const values = ids.map(id => parseFloat(document.getElementById(id).value));
+const validValues = values.filter(v => !isNaN(v) && isFinite(v));
+const avgElement = document.getElementById('avg-val');
+const devElement = document.getElementById('dev-val');
+if (validValues.length === 0) {
+avgElement.textContent = '-- N/cm';
+devElement.textContent = '-- N/cm';
+updateStatus(NaN);
+return;
+}
+const sum = validValues.reduce((a, b) => a + b, 0);
+const avg = sum / validValues.length;
+const max = Math.max(...validValues);
+const min = Math.min(...validValues);
+const dev = max - min;
+avgElement.textContent = avg.toFixed(2) + ' N/cm';
+devElement.textContent = dev.toFixed(2) + ' N/cm';
+updateStatus(dev);
 }
 function updateStatus(dev) {
-    const statusTag = document.getElementById('status-tag');
-    statusTag.className = 'status-indicator';
-    if (isNaN(dev) || !isFinite(dev)) {
-        statusTag.textContent = 'Keine Daten';
-        statusTag.classList.add('status-warning');
-        return;
-    }
-    const tolPerfect = parseFloat(document.getElementById('tol-perfect').value) || 1.5;
-    const tolWarning = parseFloat(document.getElementById('tol-warning').value) || 2.5;
-    if (dev <= tolPerfect) {
-        statusTag.textContent = 'Optimal (\u2264 ' + tolPerfect + ')';
-        statusTag.classList.add('status-perfect');
-    } else if (dev <= tolWarning) {
-        statusTag.textContent = 'Akzeptabel (\u2264 ' + tolWarning + ')';
-        statusTag.classList.add('status-warning');
-    } else {
-        statusTag.textContent = 'Kritisch (> ' + tolWarning + ')';
-        statusTag.classList.add('status-poor');
-    }
+const statusTag = document.getElementById('status-tag');
+statusTag.className = 'status-indicator';
+if (isNaN(dev) || !isFinite(dev)) {
+statusTag.textContent = 'Keine Daten';
+statusTag.classList.add('status-warning');
+return;
+}
+const tolPerfect = parseFloat(document.getElementById('tol-perfect').value) || 1.5;
+const tolWarning = parseFloat(document.getElementById('tol-warning').value) || 2.5;
+if (dev <= tolPerfect) {
+statusTag.textContent = 'Optimal (\u2264 ' + tolPerfect + ')';
+statusTag.classList.add('status-perfect');
+} else if (dev <= tolWarning) {
+statusTag.textContent = 'Akzeptabel (\u2264 ' + tolWarning + ')';
+statusTag.classList.add('status-warning');
+} else {
+statusTag.textContent = 'Kritisch (> ' + tolWarning + ')';
+statusTag.classList.add('status-poor');
+}
 }
 function resetForm() {
-    const ids = ['tl', 'tr', 'ct', 'bl', 'br'];
-    ids.forEach(id => { document.getElementById(id).value = ''; });
-    calculate();
+const ids = ['tl', 'tr', 'ct', 'bl', 'br'];
+ids.forEach(id => { document.getElementById(id).value = ''; });
+calculate();
 }
 function loadExample() {
     document.getElementById('tl').value = '20.4';
@@ -473,128 +473,128 @@ function loadExample() {
     document.getElementById('ct').value = '22.0';
     document.getElementById('bl').value = '22.6';
     document.getElementById('br').value = '21.4';
-    calculate();
+calculate();
 }
 function saveToJournal() {
-    const ids = ['tl', 'tr', 'ct', 'bl', 'br'];
-    const values = ids.map(id => parseFloat(document.getElementById(id).value));
-    if (values.some(v => isNaN(v) || !isFinite(v))) {
-        alert('Bitte fülle zuerst alle 5 Messpunkte aus!');
-        return;
-    }
-    const sum = values.reduce((a, b) => a + b, 0);
-    const avg = sum / values.length;
-    const max = Math.max(...values);
-    const min = Math.min(...values);
-    const dev = max - min;
-    const meshType = document.getElementById('mesh-type').value || 'Unbekannt';
-    const targetTension = document.getElementById('target-tension').value || '-';
-    const tolPerfect = parseFloat(document.getElementById('tol-perfect').value) || 1.5;
-    const tolWarning = parseFloat(document.getElementById('tol-warning').value) || 2.5;
-    const formattedDate = dateTimeFormatter.format(new Date());
-    const entry = {
-        timestamp: formattedDate,
-        meshType: meshType,
-        targetTension: targetTension,
-        values: values,
-        avg: avg,
-        dev: dev,
-        tolPerfect: tolPerfect,
-        tolWarning: tolWarning
-    };
-    journal.unshift(entry);
-    if (journal.length > 500) { journal.pop(); }
-    localStorage.setItem(STORAGE_JOURNAL, JSON.stringify(journal));
-    renderJournal();
+const ids = ['tl', 'tr', 'ct', 'bl', 'br'];
+const values = ids.map(id => parseFloat(document.getElementById(id).value));
+if (values.some(v => isNaN(v) || !isFinite(v))) {
+alert('Bitte fülle zuerst alle 5 Messpunkte aus!');
+return;
+}
+const sum = values.reduce((a, b) => a + b, 0);
+const avg = sum / values.length;
+const max = Math.max(...values);
+const min = Math.min(...values);
+const dev = max - min;
+const meshType = document.getElementById('mesh-type').value || 'Unbekannt';
+const targetTension = document.getElementById('target-tension').value || '-';
+const tolPerfect = parseFloat(document.getElementById('tol-perfect').value) || 1.5;
+const tolWarning = parseFloat(document.getElementById('tol-warning').value) || 2.5;
+const formattedDate = dateTimeFormatter.format(new Date());
+const entry = {
+timestamp: formattedDate,
+meshType: meshType,
+targetTension: targetTension,
+values: values,
+avg: avg,
+dev: dev,
+tolPerfect: tolPerfect,
+tolWarning: tolWarning
+};
+journal.unshift(entry);
+if (journal.length > 500) { journal.pop(); }
+localStorage.setItem(STORAGE_JOURNAL, JSON.stringify(journal));
+renderJournal();
 }
 function renderJournal() {
-    const tbody = document.getElementById('journal-body');
-    const emptyState = document.getElementById('journal-empty');
-    const searchQuery = document.getElementById('search-bar').value.toLowerCase();
-    tbody.innerHTML = '';
-    const filteredJournal = journal.filter(entry => {
-        const mesh = (entry.meshType || '');
-        const time = (entry.timestamp || '');
-        return mesh.toLowerCase().includes(searchQuery) || time.toLowerCase().includes(searchQuery);
-    });
-    if (filteredJournal.length === 0) {
-        emptyState.style.display = 'block';
-        return;
-    }
-    emptyState.style.display = 'none';
-    const fragment = document.createDocumentFragment();
-    filteredJournal.forEach((entry) => {
-        if (!entry || !Array.isArray(entry.values) || entry.values.length !== 5) { return; }
-        const tr = document.createElement('tr');
-        let statusHTML = '';
-        const limitP = entry.tolPerfect !== undefined ? entry.tolPerfect : 1.5;
-        const limitW = entry.tolWarning !== undefined ? entry.tolWarning : 2.5;
-        if (entry.dev <= limitP) {
-            statusHTML = '<span class="status-indicator status-perfect" style="font-size:9px; padding:2px 6px;">Optimal</span>';
-        } else if (entry.dev <= limitW) {
-            statusHTML = '<span class="status-indicator status-warning" style="font-size:9px; padding:2px 6px;">Akzeptabel</span>';
-        } else {
-            statusHTML = '<span class="status-indicator status-poor" style="font-size:9px; padding:2px 6px;">Kritisch</span>';
-        }
-        const tooltipValText = 'Oben L: ' + entry.values[0] + ' | Oben R: ' + entry.values[1] + ' | Mitte: ' + entry.values[2] + ' | Unten L: ' + entry.values[3] + ' | Unten R: ' + entry.values[4];
-        const targetVal = parseFloat(entry.targetTension);
-        const formattedValuesHTML = entry.values.map(val => {
-            const nodeDev = Math.abs(val - targetVal);
-            const isOut = !isNaN(targetVal) && nodeDev > limitW;
-            return '<span class="value-badge ' + (isOut ? 'badge-out' : '') + '">' + val.toFixed(1) + '</span>';
-        }).join('/');
-        tr.innerHTML = '<td>' + escapeHtml(entry.timestamp) + '</td><td>' + escapeHtml(entry.meshType) + '</td><td style="text-align: center;">' + escapeHtml(entry.targetTension.toString()) + ' N</td><td style="text-align: center;" title="' + tooltipValText + '">' + formattedValuesHTML + '</td><td style="text-align: right; color: var(--primary); font-weight: bold;">' + entry.avg.toFixed(2) + '</td><td style="text-align: right; font-weight: bold;">' + entry.dev.toFixed(2) + '</td><td style="text-align: center;">' + statusHTML + '</td>';
-        fragment.appendChild(tr);
-    });
-    tbody.appendChild(fragment);
+const tbody = document.getElementById('journal-body');
+const emptyState = document.getElementById('journal-empty');
+const searchQuery = document.getElementById('search-bar').value.toLowerCase();
+tbody.innerHTML = '';
+const filteredJournal = journal.filter(entry => {
+const mesh = (entry.meshType || '');
+const time = (entry.timestamp || '');
+return mesh.toLowerCase().includes(searchQuery) || time.toLowerCase().includes(searchQuery);
+});
+if (filteredJournal.length === 0) {
+emptyState.style.display = 'block';
+return;
+}
+emptyState.style.display = 'none';
+const fragment = document.createDocumentFragment();
+filteredJournal.forEach((entry) => {
+if (!entry || !Array.isArray(entry.values) || entry.values.length !== 5) { return; }
+const tr = document.createElement('tr');
+let statusHTML = '';
+const limitP = entry.tolPerfect !== undefined ? entry.tolPerfect : 1.5;
+const limitW = entry.tolWarning !== undefined ? entry.tolWarning : 2.5;
+if (entry.dev <= limitP) {
+statusHTML = '<span class="status-indicator status-perfect" style="font-size:9px; padding:2px 6px;">Optimal</span>';
+} else if (entry.dev <= limitW) {
+statusHTML = '<span class="status-indicator status-warning" style="font-size:9px; padding:2px 6px;">Akzeptabel</span>';
+} else {
+statusHTML = '<span class="status-indicator status-poor" style="font-size:9px; padding:2px 6px;">Kritisch</span>';
+}
+const tooltipValText = 'Oben L: ' + entry.values[0] + ' | Oben R: ' + entry.values[1] + ' | Mitte: ' + entry.values[2] + ' | Unten L: ' + entry.values[3] + ' | Unten R: ' + entry.values[4];
+const targetVal = parseFloat(entry.targetTension);
+const formattedValuesHTML = entry.values.map(val => {
+const nodeDev = Math.abs(val - targetVal);
+const isOut = !isNaN(targetVal) && nodeDev > limitW;
+return '<span class="value-badge ' + (isOut ? 'badge-out' : '') + '">' + val.toFixed(1) + '</span>';
+}).join('/');
+tr.innerHTML = '<td>' + escapeHtml(entry.timestamp) + '</td><td>' + escapeHtml(entry.meshType) + '</td><td style="text-align: center;">' + escapeHtml(entry.targetTension.toString()) + ' N</td><td style="text-align: center;" title="' + tooltipValText + '">' + formattedValuesHTML + '</td><td style="text-align: right; color: var(--primary); font-weight: bold;">' + entry.avg.toFixed(2) + '</td><td style="text-align: right; font-weight: bold;">' + entry.dev.toFixed(2) + '</td><td style="text-align: center;">' + statusHTML + '</td>';
+fragment.appendChild(tr);
+});
+tbody.appendChild(fragment);
 }
 function clearJournal() {
-    if (!confirm('Möchtest du das gesamte Messjournal wirklich leeren?')) return;
-    journal = [];
-    localStorage.removeItem(STORAGE_JOURNAL);
-    renderJournal();
+if (!confirm('Möchtest du das gesamte Messjournal wirklich leeren?')) return;
+journal = [];
+localStorage.removeItem(STORAGE_JOURNAL);
+renderJournal();
 }
 function exportToCSV() {
-    if (journal.length === 0) { alert('Keine Daten vorhanden!'); return; }
-    let csvContent = '\uFEFF';
-    csvContent += 'Datum;Gewebe;Soll-Wert (N/cm);Oben Links;Oben Rechts;Mitte;Unten Links;Unten Rechts;Durchschnitt (Ist);Abweichung\r\n';
-    journal.forEach(e => {
-        if (!e || !Array.isArray(e.values) || e.values.length !== 5) return;
-        const row = [e.timestamp, e.meshType, e.targetTension, e.values[0], e.values[1], e.values[2], e.values[3], e.values[4], e.avg.toFixed(2), e.dev.toFixed(2)].join(';');
-        csvContent += row + '\r\n';
-    });
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = 'Siebspannungen_' + new Date().toISOString().slice(0, 10) + '.csv';
-    link.click();
+if (journal.length === 0) { alert('Keine Daten vorhanden!'); return; }
+let csvContent = '\uFEFF';
+csvContent += 'Datum;Gewebe;Soll-Wert (N/cm);Oben Links;Oben Rechts;Mitte;Unten Links;Unten Rechts;Durchschnitt (Ist);Abweichung\r\n';
+journal.forEach(e => {
+if (!e || !Array.isArray(e.values) || e.values.length !== 5) return;
+const row = [e.timestamp, e.meshType, e.targetTension, e.values[0], e.values[1], e.values[2], e.values[3], e.values[4], e.avg.toFixed(2), e.dev.toFixed(2)].join(';');
+csvContent += row + '\r\n';
+});
+const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+const link = document.createElement('a');
+link.href = URL.createObjectURL(blob);
+link.download = 'Siebspannungen_' + new Date().toISOString().slice(0, 10) + '.csv';
+link.click();
 }
 function exportToJSON() {
-    if (journal.length === 0) { alert('Keine Daten!'); return; }
-    const blob = new Blob([JSON.stringify(journal, null, 2)], { type: 'application/json' });
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = 'SiebspannungsJournalBackup_' + new Date().toISOString().slice(0, 10) + '.json';
-    link.click();
+if (journal.length === 0) { alert('Keine Daten!'); return; }
+const blob = new Blob([JSON.stringify(journal, null, 2)], { type: 'application/json' });
+const link = document.createElement('a');
+link.href = URL.createObjectURL(blob);
+link.download = 'SiebspannungsJournalBackup_' + new Date().toISOString().slice(0, 10) + '.json';
+link.click();
 }
 function triggerJSONImport() { document.getElementById('json-file-input').click(); }
 function importFromJSON(event) {
-    const file = event.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = function(e) {
-        try {
-            const importedData = JSON.parse(e.target.result);
-            if (!Array.isArray(importedData)) throw new Error('Ungültiges Format.');
-            if (confirm('Möchtest du Einträge importieren?')) {
-                journal = importedData.concat(journal).slice(0, 500);
-                localStorage.setItem(STORAGE_JOURNAL, JSON.stringify(journal));
-                renderJournal();
-            }
-        } catch (error) { alert('Fehler: ' + error.message); }
-    };
-    reader.readAsText(file);
-    event.target.value = '';
+const file = event.target.files[0];
+if (!file) return;
+const reader = new FileReader();
+reader.onload = function(e) {
+try {
+const importedData = JSON.parse(e.target.result);
+if (!Array.isArray(importedData)) throw new Error('Ungültiges Format.');
+if (confirm('Möchtest du Einträge importieren?')) {
+journal = importedData.concat(journal).slice(0, 500);
+localStorage.setItem(STORAGE_JOURNAL, JSON.stringify(journal));
+renderJournal();
+}
+} catch (error) { alert('Fehler: ' + error.message); }
+};
+reader.readAsText(file);
+event.target.value = '';
 }
 loadSettings();
 calculate();
@@ -602,9 +602,9 @@ renderJournal();
 </script>
 <script>
 if ("serviceWorker" in navigator) {
-    window.addEventListener("load", () => {
-        navigator.serviceWorker.register("service-worker.js");
-    });
+window.addEventListener("load", () => {
+navigator.serviceWorker.register("service-worker.js");
+});
 }
 </script>
 
